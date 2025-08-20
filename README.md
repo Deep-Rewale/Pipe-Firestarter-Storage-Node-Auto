@@ -34,7 +34,7 @@ After running the command, you'll see a menu like this:
 The interactive menu makes everything simple. Here’s what each action lets you do:
 
 - **🛠️ Install Node:**  
-    Set up your storage node for the first time. Enter your username and password, save your credentials, and connect your Solana wallet. You’ll need some test SOL (in script i have added auto deploy SOL to your address so no need to claim manually from site . thats all need to complete the setup.
+    Set up your storage node for the first time. Enter your username and password, save your credentials, and connect your Solana wallet. You’ll need some test SOL (in script i have added auto deploy SOL to your address so no need to claim manually from site.) thats all need to complete the setup.
 
 - **⬆️ Upload Video:**  
     Choose from four upload methods:
