@@ -176,7 +176,7 @@ install_node() {
     read -p "$(echo -e 🔗 Enter a referral code \(or press Enter to use my refer code 🥹\):)" referral_code
 
     if [ -z "$referral_code" ]; then
-        referral_code="ITZMEAAS-PFJU"
+        referral_code="DEEP28-TE78"
         echo -e "${YELLOW}🔗 Using default referral code: $referral_code${NC}"
     fi
 
