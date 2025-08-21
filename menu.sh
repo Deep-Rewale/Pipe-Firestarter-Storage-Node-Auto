@@ -188,7 +188,9 @@ install_node() {
 auto_claim_faucet() {
     cat << 'EOF' > solana_airdrop.py
 #!/usr/bin/env python3
-import requests, time, uuid
+import requests
+import time
+import uuid
 
 RPC_URL = "https://api.devnet.solana.com"
 LAMPORTS_PER_SOL = 1_000_000_000
@@ -255,8 +257,16 @@ if __name__ == "__main__":
         print("Please provide a Solana public key.")
 EOF
     chmod +x solana_airdrop.py
+    if [ -z "$SOLANA_PUBKEY" ]; then
+        SOLANA_PUBKEY=$(jq -r '.solana_pubkey // "Not found"' "$HOME/.pipe-cli.json" 2>/dev/null)
+        if [ "$SOLANA_PUBKEY" = "Not found" ]; then
+            echo -e "${RED}❌ Solana Public Key not found. Please run 'Install Node' first.${NC}"
+            return_to_menu
+            return
+        fi
+    fi
     retries=0
-    max_retries=3
+    max_retries=5
     while [ $retries -lt $max_retries ]; do
         attempt=$((retries+1))
         echo -e "${BLUE}💰 Attempting to claim 5 Devnet SOL (Attempt ${attempt}/${max_retries})...${NC}"
@@ -268,22 +278,20 @@ EOF
             rm -f solana_airdrop.py
             return 0
         else
-            echo -e "${RED}❌ Airdrop failed: $message${NC}"
+            echo -e "${YELLOW}⚠️ Airdrop failed: $message${NC}"
             retries=$((retries+1))
             sleep 5
         fi
     done
     rm -f solana_airdrop.py
-    echo -e "${RED}❌ Auto claim failed after $max_retries attempts.${NC}"
+    echo -e "${YELLOW}⚠️ Auto claim failed after $max_retries attempts.${NC}"
     echo -e "${YELLOW}💰 Please claim 5 Devnet SOL manually from https://faucet.solana.com/ using your Solana Public Key: $SOLANA_PUBKEY${NC}"
     read -r -p "✅ Enter 'yes' to confirm you have claimed the SOL: " confirmation
     if [ "$confirmation" != "yes" ]; then
         echo -e "${RED}❌ SOL not claimed. Exiting.${NC}"
-        cleanup
         exit 1
     fi
 }
-
 perform_swap() {
     echo -e "${BLUE}⏳ Waiting 10 seconds before swapping...${NC}"
     sleep 10
