@@ -26,8 +26,7 @@ After running the command, you'll see a menu like this:
 5. 📈 Check Token Usage
 6. 🔑 Show Credentials
 7. 🔥 Swap tokens
-8. 💰 Claim Faucet
-9. ❌ Exit
+8. ❌ Exit
 ```
 
 ## 🧭 What Can You Do With the Menu?
