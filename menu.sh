@@ -1318,11 +1318,11 @@ while true; do
     echo -e "${YELLOW}8. 💰 Claim Faucet${NC}"
     echo -e "${YELLOW}9. ❌ Exit${NC}"
     echo -e "${BLUE}=============================================================================${NC}"
-    IN_MENU=1
+ IN_MENU=1
     read -p "$(echo -e Select an option: )" choice
     IN_MENU=0
     case $choice in
-       1)
+        1)
             install_node
             ;;
         2) upload_file ;;
