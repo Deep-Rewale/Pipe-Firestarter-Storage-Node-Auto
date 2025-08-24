@@ -356,8 +356,6 @@ upload_file() {
         show_header
         echo -e "${BLUE}${BOLD}======================= Upload File Submenu =======================${NC}"
         echo -e "${YELLOW}1. 📹 Upload from YouTube (yt-dlp)${NC}"
-        echo -e "${YELLOW}2. 🎥 Upload from Pixabay${NC}"
-        echo -e "${YELLOW}3. 📽️ Upload from Pexels${NC}"
         echo -e "${YELLOW}4. 🗂️ Manual Upload (from home or pipe folder)${NC}"
         echo -e "${YELLOW}5. 🔙 Back to Main Menu${NC}"
         echo -e "${BLUE}=================================================================${NC}"
