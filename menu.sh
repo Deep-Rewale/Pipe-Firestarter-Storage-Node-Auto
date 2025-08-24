@@ -459,28 +459,36 @@ perform_swap() {
 }
 
 upload_file() {
-    check_pipe
-    VENV_DIR="$HOME/pipe_venv"
-    if [ ! -d "$VENV_DIR" ]; then
-        setup_venv
-    fi
-    source "$VENV_DIR/bin/activate"
-    available_sources=("manual")
-    if pip show yt-dlp >/dev/null 2>&1; then available_sources+=("youtube"); fi
-    if pip show requests >/dev/null 2>&1; then available_sources+=("pixabay" "pexels"); fi
-    if [ ${#available_sources[@]} -eq 1 ]; then
-        echo -e "${YELLOW}⚠️ No download sources available (yt-dlp or requests not installed). Only manual upload is available.${NC}"
-    fi
+  check_pipe
+  VENV_DIR="$HOME/pipe_venv"
+  if [ ! -d "$VENV_DIR" ]; then
+    setup_venv
+  fi
+  
+  source "$VENV_DIR/bin/activate"
+  available_sources=("manual")
+  if pip show yt-dlp >/dev/null 2>&1; then
+    available_sources+=("youtube")
+  fi
+  if pip show requests >/dev/null 2>&1; then
+    available_sources+=("pixabay" "pexels")
+  fi
+
+  if [ ${#available_sources[@]} -eq 1 ]; then
+    echo -e "${YELLOW}⚠️ No download sources available [...]${NC}"
+  fi  # <-- This fi closes the 'if available_sources eq 1'
+
+  if ! command -v ffmpeg >/dev/null 2>&1; then
+    echo -e "${YELLOW}⚠️ ffmpeg is not installed. Attempting to install...${NC}"
+    sudo apt update && sudo apt install -y ffmpeg
     if ! command -v ffmpeg >/dev/null 2>&1; then
-        echo -e "${YELLOW}⚠️ ffmpeg is not installed. Attempting to install...${NC}"
-        sudo apt update && sudo apt install -y ffmpeg
-        if ! command -v ffmpeg >/dev/null 2>&1; then
-            echo -e "${YELLOW}⚠️ Failed to install ffmpeg. Continuing without it...${NC}"
-        else
-            echo -e "${GREEN}✅ ffmpeg installed successfully.${NC}"
-        fi
+      echo -e "${YELLOW}⚠️ Failed to install ffmpeg. Continuing without it...${NC}"
+    else
+      echo -e "${GREEN}✅ ffmpeg installed successfully.${NC}"
     fi
-    while true; do
+  fi
+
+  while true; do
         clear
         show_header
         echo -e "${BLUE}${BOLD}======================= Upload File Submenu =======================${NC}"
