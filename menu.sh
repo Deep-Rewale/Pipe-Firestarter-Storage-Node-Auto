@@ -74,6 +74,11 @@ setup_venv() {
     echo -e "${GREEN}✅ All required packages installed successfully in venv!${NC}"
     deactivate
 }
+check_pipe() {
+    if ! command -v pipe >/dev/null 2>&1; then
+        setup_pipe_path
+    fi
+}
 
 setup_pipe_path() {
     if [ -f "$HOME/.cargo/bin/pipe" ]; then
@@ -188,7 +193,9 @@ install_node() {
 auto_claim_faucet() {
     cat << 'EOF' > solana_airdrop.py
 #!/usr/bin/env python3
-import requests, time, uuid
+import requests
+import time
+import uuid
 
 RPC_URL = "https://api.devnet.solana.com"
 LAMPORTS_PER_SOL = 1_000_000_000
@@ -255,8 +262,16 @@ if __name__ == "__main__":
         print("Please provide a Solana public key.")
 EOF
     chmod +x solana_airdrop.py
+    if [ -z "$SOLANA_PUBKEY" ]; then
+        SOLANA_PUBKEY=$(jq -r '.solana_pubkey // "Not found"' "$HOME/.pipe-solana-key.json" 2>/dev/null)
+        if [ "$SOLANA_PUBKEY" = "Not found" ]; then
+            echo -e "${RED}❌ Solana Public Key not found. Please run 'Install Node' first.${NC}"
+            return_to_menu
+            return
+        fi
+    fi
     retries=0
-    max_retries=3
+    max_retries=5
     while [ $retries -lt $max_retries ]; do
         attempt=$((retries+1))
         echo -e "${BLUE}💰 Attempting to claim 5 Devnet SOL (Attempt ${attempt}/${max_retries})...${NC}"
@@ -266,22 +281,23 @@ EOF
         if [ $success -eq 1 ]; then
             echo -e "${GREEN}✅ Airdrop successful. Tx: $message${NC}"
             rm -f solana_airdrop.py
+            return_to_menu
             return 0
         else
-            echo -e "${RED}❌ Airdrop failed: $message${NC}"
+            echo -e "${YELLOW}⚠️ Airdrop failed: $message${NC}"
             retries=$((retries+1))
             sleep 5
         fi
     done
     rm -f solana_airdrop.py
-    echo -e "${RED}❌ Auto claim failed after $max_retries attempts.${NC}"
+    echo -e "${YELLOW}⚠️ Auto claim failed after $max_retries attempts.${NC}"
     echo -e "${YELLOW}💰 Please claim 5 Devnet SOL manually from https://faucet.solana.com/ using your Solana Public Key: $SOLANA_PUBKEY${NC}"
     read -r -p "✅ Enter 'yes' to confirm you have claimed the SOL: " confirmation
     if [ "$confirmation" != "yes" ]; then
         echo -e "${RED}❌ SOL not claimed. Exiting.${NC}"
-        cleanup
         exit 1
     fi
+    return_to_menu
 }
 
 perform_swap() {
@@ -502,24 +518,30 @@ show_file_info() {
 show_credentials() {
     echo -e "${BLUE}🔑 Pipe Credentials:${NC}"
     if [ -f "$HOME/.pipe-cli.json" ]; then
-        user_id=$(jq -r '.user_id' "$HOME/.pipe-cli.json")
-        user_app_key=$(jq -r '.user_app_key' "$HOME/.pipe-cli.json")
-        username=$(jq -r '.username' "$HOME/.pipe-cli.json")
-        access_token=$(jq -r '.auth_tokens.access_token' "$HOME/.pipe-cli.json")
-        refresh_token=$(jq -r '.auth_tokens.refresh_token' "$HOME/.pipe-cli.json")
-        token_type=$(jq -r '.auth_tokens.token_type' "$HOME/.pipe-cli.json")
-        expires_in=$(jq -r '.auth_tokens.expires_in' "$HOME/.pipe-cli.json")
-        expires_at=$(jq -r '.auth_tokens.expires_at' "$HOME/.pipe-cli.json")
-        solana_pubkey=$(jq -r '.solana_pubkey // "Not found"' "$HOME/.pipe-cli.json")
-        
+        user_id=$(jq -r '.user_id // "Not found"' "$HOME/.pipe-cli.json")
+        user_app_key=$(jq -r '.user_app_key // "Not found"' "$HOME/.pipe-cli.json")
+        username=$(jq -r '.username // "Not found"' "$HOME/.pipe-cli.json")
+        access_token=$(jq -r '.auth_tokens.access_token // "Not found"' "$HOME/.pipe-cli.json")
+        refresh_token=$(jq -r '.auth_tokens.refresh_token // "Not found"' "$HOME/.pipe-cli.json")
+        token_type=$(jq -r '.auth_tokens.token_type // "Not found"' "$HOME/.pipe-cli.json")
+        expires_in=$(jq -r '.auth_tokens.expires_in // "Not found"' "$HOME/.pipe-cli.json")
+        expires_at=$(jq -r '.auth_tokens.expires_at // "Not found"' "$HOME/.pipe-cli.json")
+        if [ -f "$HOME/.pipe-solana-key.json" ]; then
+            solana_pubkey=$(jq -r '.solana_pubkey // "Not found"' "$HOME/.pipe-solana-key.json")
+        else
+            solana_pubkey="Not found"
+        fi
         read -p "$(echo -e ${YELLOW}🔍 Show full Access and Refresh Tokens? \(y/n, default n\): ${NC})" show_full
         echo -e "${YELLOW}👤 Username: ${GREEN}$username${NC}"
         echo -e "${YELLOW}🆔 User ID: ${GREEN}$user_id${NC}"
         echo -e "${YELLOW}🔐 User App Key: ${GREEN}$user_app_key${NC}"
         echo -e "${YELLOW}🔑 Solana Public Key: ${GREEN}$solana_pubkey${NC}"
-        echo -e "${YELLOW}🔒 Auth Tokens:${NC}"
         echo -e "${YELLOW}📜 Token Type: ${GREEN}$token_type${NC}"
-        echo -e "${YELLOW}⏳ Expires In: ${GREEN}$expires_in seconds${NC}"
+        if [ "$expires_in" != "Not found" ]; then
+            echo -e "${YELLOW}⏳ Expires In: ${GREEN}$expires_in seconds${NC}"
+        else
+            echo -e "${YELLOW}⏳ Expires In: ${GREEN}Not found${NC}"
+        fi
         echo -e "${YELLOW}📅 Expires At: ${GREEN}$expires_at${NC}"
         if [ "$show_full" = "y" ] || [ "$show_full" = "Y" ]; then
             echo -e "${YELLOW}🔑 Access Token: ${GREEN}$access_token${NC}"
@@ -529,14 +551,22 @@ show_credentials() {
             echo -e "${YELLOW}🔄 Refresh Token: ${GREEN}${refresh_token:0:20}... (truncated for brevity)${NC}"
         fi
     else
-        echo -e "${RED}❌ Credentials file (~/.pipe-cli.json) not found.${NC}"
+        echo -e "${YELLOW}⚠️ Credentials file (~/.pipe-cli.json) not found.${NC}"
+        if [ -f "$HOME/.pipe-solana-key.json" ]; then
+            solana_pubkey=$(jq -r '.solana_pubkey // "Not found"' "$HOME/.pipe-solana-key.json")
+            echo -e "${YELLOW}🔑 Solana Public Key: ${GREEN}$solana_pubkey${NC}"
+        else
+            echo -e "${YELLOW}🔑 Solana Public Key: ${GREEN}Not found${NC}"
+        fi
     fi
     return_to_menu
 }
 
 show_referral() {
+    check_pipe
+    pipe referral generate >/dev/null 2>&1
     echo -e "${BLUE}📊 Your referral stats:${NC}"
-    pipe referral show || echo -e "${RED}❌ Failed to retrieve referral stats.${NC}"
+    pipe referral show 2>&1 | tee -a "$LOG_FILE" || echo -e "${YELLOW}⚠️ Failed to retrieve referral stats.${NC}"
     return_to_menu
 }
 
@@ -568,6 +598,11 @@ check_token_usage() {
     pipe token-usage || echo -e "${RED}❌ Failed to check token usage.${NC}"
     return_to_menu
 }
+
+claim_faucet() {
+    auto_claim_faucet
+}
+
 
 cat << 'EOF' > video_downloader.py
 import yt_dlp
@@ -1098,7 +1133,8 @@ while true; do
     echo -e "${YELLOW}5. 📈 Check Token Usage${NC}"
     echo -e "${YELLOW}6. 🔑 Show Credentials${NC}"
     echo -e "${YELLOW}7. 🔥 Swap Tokens${NC}"
-    echo -e "${YELLOW}8. ❌ Exit${NC}"
+    echo -e "${YELLOW}8. 💰 Claim Faucet${NC}"
+    echo -e "${YELLOW}9. ❌ Exit${NC}"
     echo -e "${BLUE}=============================================================================${NC}"
     IN_MENU=1
     read -p "$(echo -e Select an option: )" choice
@@ -1115,7 +1151,8 @@ while true; do
         5) check_token_usage ;;
         6) show_credentials ;;
         7) swap_tokens ;;
-        8) echo -e "${GREEN}👋 Exiting...${NC}"; exit 0 ;;
+        8)claim_faucet ;;
+        9) echo -e "${GREEN}👋 Exiting...${NC}"; exit 0 ;;
         *) echo -e "${RED}❌ Invalid option. Try again.${NC}"; sleep 1 ;;
     esac
 done
