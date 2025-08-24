@@ -312,9 +312,6 @@ install_node() {
     done
 }
 
-
-
-
 auto_claim_faucet() {
     cat << 'EOF' > solana_airdrop.py
 #!/usr/bin/env python3
@@ -424,8 +421,6 @@ EOF
     fi
     return_to_menu
 }
-
-
 
 perform_swap() {
     check_pipe
