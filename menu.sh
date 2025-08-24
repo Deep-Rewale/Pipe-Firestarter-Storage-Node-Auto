@@ -29,7 +29,7 @@ show_header() {
     echo "████  ████ ██   ██ ██   ██ ██          ██   ██  ██  ██      ██   ██ ██      ██      ██   ██ "
     echo "██ ████ ██ ███████ ██   ██ █████       ██████    ████       ██   ██ █████   █████   ██████  "
     echo "██  ██  ██ ██   ██ ██   ██ ██          ██   ██    ██        ██   ██ ██      ██      ██      "
-    echo "██      ██ ██   ██ ██████  ███████     ██████     ██        ██████  ███████ ███████ ██      "                                                                                           "
+    echo "██      ██ ██   ██ ██████  ███████     ██████     ██        ██████  ███████ ███████ ██      "
     echo -e "${YELLOW}             🚀 PIPE NODE MANAGER BY DEEP 🚀${NC}"
     echo -e "${YELLOW}            💻 GitHub: https://github.com/Deep-Rewale${NC}"
     echo -e "${YELLOW}            💬Telegram: https://t.me/Deeprewale${NC}"
