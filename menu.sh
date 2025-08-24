@@ -487,6 +487,8 @@ upload_file() {
         for i in "${!available_sources[@]}"; do
             case ${available_sources[$i]} in
                 "youtube") echo -e "${YELLOW}$((i+1)). 📹 Upload from YouTube (yt-dlp)${NC}" ;;
+                "pixabay") echo -e "${YELLOW}$((i+1)). 🎥 Upload from Pixabay${NC}" ;;
+                "pexels") echo -e "${YELLOW}$((i+1)). 📽️ Upload from Pexels${NC}" ;;
                 "manual") echo -e "${YELLOW}$((i+1)). 🗂️ Manual Upload (from home or pipe folder)${NC}" ;;
             esac
         done
@@ -689,6 +691,8 @@ upload_file() {
     done
     deactivate
 }
+
+
 show_file_info() {
     echo -e "${BLUE}📄 Uploaded File Details:${NC}"
     if [ -f "file_details.json" ]; then
