@@ -1,14 +1,26 @@
 #!/bin/bash
+
+# Color codes for terminal output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 BOLD='\033[1m'
+
+# Initialize variables
 CTRL_C_COUNT=0
 IN_MENU=0
+LOG_DIR="$HOME/pipe_logs"
+LOG_FILE="$LOG_DIR/pipe_manager_$(date +%Y%m%d_%H%M%S).log"
 
-trap 'handle_ctrl_c' SIGINT #AAAAAAAAAAAAAAA
+# Trap Ctrl+C
+trap 'handle_ctrl_c' SIGINT
+
+# Create log directory and file
+mkdir -p "$LOG_DIR"
+exec 1> >(tee -a "$LOG_FILE")
+exec 2>&1
 
 show_header() {
     clear
