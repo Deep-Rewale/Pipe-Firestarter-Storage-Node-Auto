@@ -1005,4 +1005,4 @@ while true; do
         9) echo -e "${GREEN}👋 Exiting...${NC}"; exit 0 ;;
         *) echo -e "${RED}❌ Invalid option. Try again.${NC}"; sleep 1 ;;
     esac
-done
+    done
