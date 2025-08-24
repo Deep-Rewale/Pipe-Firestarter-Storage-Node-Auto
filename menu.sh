@@ -1308,7 +1308,7 @@ EOF
 while true; do
     show_header
     echo -e "${BLUE}${BOLD}======================= PIPE NODE MADE BY DEEP 💖 =======================${NC}"
-   echo -e "${YELLOW}1. 🛠️ Install Node${NC}"
+    echo -e "${YELLOW}1. 🛠️ Install Node${NC}"
     echo -e "${YELLOW}2. ⬆️ Upload File${NC}"
     echo -e "${YELLOW}3. 📄 Show Uploaded File Info${NC}"
     echo -e "${YELLOW}4. 🔗 Show Referral Stats and Code${NC}"
@@ -1318,7 +1318,7 @@ while true; do
     echo -e "${YELLOW}8. 💰 Claim Faucet${NC}"
     echo -e "${YELLOW}9. ❌ Exit${NC}"
     echo -e "${BLUE}=============================================================================${NC}"
- IN_MENU=1
+  IN_MENU=1
     read -p "$(echo -e Select an option: )" choice
     IN_MENU=0
     case $choice in
