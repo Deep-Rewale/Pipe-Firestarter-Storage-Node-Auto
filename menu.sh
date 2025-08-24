@@ -974,10 +974,9 @@ if __name__ == "__main__":
         print("Please provide a search query and output filename.")
 EOF
 
-
 while true; do
     show_header
-    echo -e "${BLUE}${BOLD}======================= PIPE NODE MADE BY DEEP 💖 =======================${NC}"
+    echo -e "${BLUE}${BOLD}======================= Pipe NODE MANAGER BY DEEP 💖 =======================${NC}"
     echo -e "${YELLOW}1. 🛠️ Install Node${NC}"
     echo -e "${YELLOW}2. ⬆️ Upload File${NC}"
     echo -e "${YELLOW}3. 📄 Show Uploaded File Info${NC}"
@@ -988,7 +987,7 @@ while true; do
     echo -e "${YELLOW}8. 💰 Claim Faucet${NC}"
     echo -e "${YELLOW}9. ❌ Exit${NC}"
     echo -e "${BLUE}=============================================================================${NC}"
-  IN_MENU=1
+    IN_MENU=1
     read -p "$(echo -e Select an option: )" choice
     IN_MENU=0
     case $choice in
@@ -1005,4 +1004,4 @@ while true; do
         9) echo -e "${GREEN}👋 Exiting...${NC}"; exit 0 ;;
         *) echo -e "${RED}❌ Invalid option. Try again.${NC}"; sleep 1 ;;
     esac
-    done
+done
