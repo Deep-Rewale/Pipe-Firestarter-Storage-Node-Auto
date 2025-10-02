@@ -873,12 +873,15 @@ def concatenate_with_moviepy(files, output_file):
         return False
 
 def download_videos(query, output_file, target_size_mb=1000, max_filesize=1100*1024*1024, min_filesize=50*1024*1024):
+    # safer yt-dlp format selection
     ydl_opts = {
-        'format': 'best',
+        'format': 'bv*+ba/best/bestvideo+bestaudio/best',
         'noplaylist': True,
         'quiet': True,
         'progress_hooks': [progress_hook],
-        'outtmpl': '%(title)s.%(ext)s'
+        'outtmpl': '%(title).100s.%(ext)s',  # prevent weird long filenames
+        'ignoreerrors': True,
+        'merge_output_format': 'mp4'
     }
     total_downloaded = 0
     total_size = 0
@@ -901,13 +904,17 @@ def download_videos(query, output_file, target_size_mb=1000, max_filesize=1100*1
                     total_size += size
                     current_file = len(downloaded_files) + 1
                     print(f"🎬 Downloading video {current_file}: {v['title']} ({format_size(size)})")
-                    ydl.download([v['webpage_url']])
-                    filename = ydl.prepare_filename(v)
-                    if os.path.exists(filename) and os.path.getsize(filename) > 0:
-                        downloaded_files.append(filename)
-                        total_downloaded += size
-                    else:
-                        print(f"⚠️ Failed to download or empty file: {filename}")
+                    try:
+                        ydl.download([v['webpage_url']])
+                        filename = ydl.prepare_filename(v)
+                        if os.path.exists(filename) and os.path.getsize(filename) > 0:
+                            downloaded_files.append(filename)
+                            total_downloaded += size
+                        else:
+                            print(f"⚠️ Failed to download or empty file: {filename}")
+                            continue
+                    except Exception as e:
+                        print(f"⚠️ Error downloading {v['title']}: {str(e)}")
                         continue
                     elapsed = time.time() - start_time
                     speed = total_downloaded / (1024*1024*elapsed) if elapsed > 0 else 0
@@ -916,7 +923,7 @@ def download_videos(query, output_file, target_size_mb=1000, max_filesize=1100*1
                           f"({format_size(total_downloaded)}/{format_size(total_size)}) "
                           f"Speed: {speed:.2f} MB/s ETA: {format_time(eta)}")
         if not downloaded_files:
-            print("⚠️ No videos found close to 1GB.")
+            print("⚠️ No videos downloaded successfully.")
             return
         if len(downloaded_files) == 1:
             os.rename(downloaded_files[0], output_file)
@@ -974,6 +981,7 @@ if __name__ == "__main__":
     else:
         print("Please provide a search query and output filename.")
 EOF
+
 
 # Write pixabay_downloader.py
 cat << 'EOF' > pixabay_downloader.py
