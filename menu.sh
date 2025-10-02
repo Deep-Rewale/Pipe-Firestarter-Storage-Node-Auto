@@ -1308,7 +1308,8 @@ if __name__ == "__main__":
     else:
         print("Please provide a search query and output filename.")
 EOF
-
+echo "🔄 Updating yt-dlp..."
+pip install -U yt-dlp >/dev/null 2>&1 || yt-dlp -U
 while true; do
     show_header
     echo -e "${BLUE}${BOLD}======================= Pipe NODE MANAGER BY Deep 💖 =======================${NC}"
